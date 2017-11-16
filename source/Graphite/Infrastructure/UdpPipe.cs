@@ -12,11 +12,11 @@ namespace Graphite.Infrastructure
 
         private bool disposed;
 
-        public UdpPipe(IPAddress address, int port)
+        public UdpPipe(string address, int port)
         {
             this.udpClient = new UdpClient();
 
-            this.udpClient.Connect(new IPEndPoint(address, port));
+            this.udpClient.Connect(address, port);
         }
 
         public bool Send(string message)

@@ -158,11 +158,10 @@ namespace Graphite
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Objekte verwerfen, bevor Bereich verloren geht", Justification="Ownership transferred to outer pipe.")]
         private void SetupStatsD(IStatsDConfiguration configuration)
         {
-            IPAddress address = Helpers.ParseAddress(configuration.Address);
+            Func<IPipe> pipeFactory = () => new UdpPipe(configuration.Address, configuration.Port);
 
-            // Initialize with ip address.
-            IPipe inner = new UdpPipe(address, configuration.Port);
-
+            var inner = new RobustPipe(pipeFactory, 3);
+            
             this.statsdPipe = new SamplingPipe(inner);
         }
 
@@ -179,7 +178,9 @@ namespace Graphite
             else if (configuration.Transport == TransportType.Udp)
             {
                 // Initialize with ip address.
-                this.graphitePipe = new UdpPipe(address, configuration.Port);
+                Func<IPipe> pipeFactory = () => new UdpPipe(configuration.Address, configuration.Port);
+
+                this.graphitePipe = new RobustPipe(pipeFactory, 3);
             }
             else
             {
